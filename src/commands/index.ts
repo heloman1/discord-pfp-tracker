@@ -27,13 +27,11 @@ export async function refreshSlashCommands(
         return command.commandBuilder.toJSON();
     });
     try {
-        console.log("Started refreshing application (/) commands.");
-
+        console.log("Refreshing Slash Commands...");
         await rest.put(Routes.applicationGuildCommands(appId, guildId), {
             body: payload,
         });
-
-        console.log("Successfully reloaded application (/) commands.");
+        console.log("Done!");
     } catch (error) {
         console.error(error);
     }

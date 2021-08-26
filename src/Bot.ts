@@ -16,7 +16,41 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         partials: ["CHANNEL"],
         userChangeCount: keyv,
     });
+    client.on("ready", async (client) => {
+        if (!(client instanceof ExtendedClient)) return;
 
+        console.log(`Logged in as ${client.user.tag}!`);
+        console.log(
+            `Here's my invite: ${client.generateInvite({
+                scopes: [
+                    "bot",
+                    "guilds.join",
+                    "applications.commands",
+                    "applications.store.update",
+                ],
+            })}`
+        );
+
+        // Trying to get rid of all undefined's
+        console.log("Updating user list...");
+        const users = client.users.cache;
+        for (const [snowflake, user] of users) {
+            if ((await client.userChangeCount.get(snowflake)) === undefined) {
+                console.log(
+                    `Adding ${user.tag} (${snowflake}) with a count of 0`
+                );
+                client.userChangeCount.set(snowflake, 0);
+            }
+        }
+        console.log("Done!");
+
+        await refreshSlashCommands(
+            commands,
+            config.appId,
+            config.guildId,
+            config.botToken
+        );
+    });
     // Add any users that join a guild that didn't exist before
     client.on("guildMemberAdd", async (member) => {
         if (!(member.client instanceof ExtendedClient)) {
@@ -55,46 +89,6 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         } else {
             console.log("The avatar is the same.");
         }
-    });
-
-    client.on("ready", async (client) => {
-        if (!(client instanceof ExtendedClient)) {
-            return;
-        }
-        // const guilds = client.guilds.cache;
-        console.log(`Logged in as ${client.user?.tag}!`);
-        console.log(
-            `Here's my invite: ${client.generateInvite({
-                scopes: [
-                    "bot",
-                    "guilds.join",
-                    "applications.commands",
-                    "applications.store.update",
-                ],
-            })}`
-        );
-
-        console.log("Updating user list...");
-        const users = client.users.cache;
-        for (const [snowflake, user] of users) {
-            if ((await client.userChangeCount.get(snowflake)) === undefined) {
-                console.log(
-                    `Adding ${user.tag} (${snowflake}) with a count of 0`
-                );
-                client.userChangeCount.set(snowflake, 0);
-            }
-        }
-        console.log("Done!");
-
-        console.log("Refreshing Guild Commands...");
-
-        await refreshSlashCommands(
-            commands,
-            config.appId,
-            config.guildId,
-            config.botToken
-        );
-        console.log("Done!");
     });
 
     client.on("interactionCreate", async (interaction) => {
