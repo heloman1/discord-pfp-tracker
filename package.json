@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node out/Bot.js"
+    "start": "node out/Init.js"
   },
   "keywords": [],
   "author": "",
