@@ -16,7 +16,7 @@ export const commands = new Collection<string, Command>([
 let rest: REST | undefined;
 export async function refreshSlashCommands(
     commands: Collection<string, Command>,
-    clientId: string,
+    appId: string,
     guildId: string,
     token: string
 ) {
@@ -29,7 +29,7 @@ export async function refreshSlashCommands(
     try {
         console.log("Started refreshing application (/) commands.");
 
-        await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+        await rest.put(Routes.applicationGuildCommands(appId, guildId), {
             body: payload,
         });
 

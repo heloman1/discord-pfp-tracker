@@ -4,7 +4,7 @@ import Keyv from "keyv";
 import { ExtendedClient } from "./ExtendedClient";
 import { commands, refreshSlashCommands } from "./commands";
 interface Config {
-    clientId: string;
+    appId: string;
     guildId: string;
     botToken: string;
     dbURI?: string;
@@ -128,7 +128,7 @@ client.on("ready", async (client) => {
 
     await refreshSlashCommands(
         commands,
-        config.clientId,
+        config.appId,
         config.guildId,
         config.botToken
     );
