@@ -1,7 +1,7 @@
 import { Intents } from "discord.js";
 import { Config } from "./types";
 import { ExtendedClient } from "./ExtendedClient";
-import { commands, refreshSlashCommands } from "./commands";
+import { commands } from "./commands";
 import Keyv from "keyv";
 
 export function runBot(keyv: Keyv<number>, config: Config) {
@@ -44,7 +44,7 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         }
         console.log("Done!");
 
-        await refreshSlashCommands(
+        await client.refreshSlashCommands(
             commands,
             config.appId,
             config.guildId,
@@ -115,6 +115,17 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         }
     });
 
+    client.on("guildCreate", async (guild) => {
+        const members = await guild.members.fetch();
+        for (const [_, member] of members) {
+            if ((await client.userChangeCount.get(member.id)) === undefined) {
+                console.log(
+                    `Member joined: Adding ${member.user.tag} (${member.id}) with a count of 0`
+                );
+                client.userChangeCount.set(member.id, 0);
+            }
+        }
+    });
     // client.on("messageCreate", (msg) => {
     //     if (msg.author.id != client.user?.id) {
     //         msg.author.send("Don't talk to me");
