@@ -22,7 +22,6 @@ export class ExtendedClient extends Client {
     async refreshSlashCommands(
         commands: Collection<string, Command>,
         appId: string,
-        guildId: string,
         token: string
     ) {
         if (!this.SlashCommandRest) {
@@ -33,12 +32,14 @@ export class ExtendedClient extends Client {
         });
         try {
             console.log("Refreshing Slash Commands...");
-            await this.SlashCommandRest.put(
-                Routes.applicationGuildCommands(appId, guildId),
-                {
-                    body: payload,
-                }
-            );
+            for (const [id, guild] of await this.guilds.fetch()) {
+                await this.SlashCommandRest.put(
+                    Routes.applicationGuildCommands(appId, id),
+                    {
+                        body: payload,
+                    }
+                );
+            }
             console.log("Done!");
         } catch (error) {
             console.error(error);

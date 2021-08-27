@@ -47,7 +47,6 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         await client.refreshSlashCommands(
             commands,
             config.appId,
-            config.guildId,
             config.botToken
         );
     });
