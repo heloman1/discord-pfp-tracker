@@ -14,6 +14,9 @@ function loadConfig(path: string): Config {
     if (!config.botToken) {
         throw `${configPath} must have a botToken`;
     }
+    if (!config.botOwner) {
+        throw "Please set the botOwner";
+    }
     return config;
 }
 

@@ -41,8 +41,11 @@ export default new Command(
             );
             return;
         }
-        if (!interaction.guild) {
-            interaction.reply("This command doesn't work outside of a guild");
+        const client = interaction.client;
+        if (!(interaction.member?.user.id == client.botOwner?.id)) {
+            interaction.reply(
+                `You must be the creator of the bot to use this command`
+            );
             return;
         }
 

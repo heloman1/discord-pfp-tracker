@@ -3,4 +3,5 @@ export interface Config {
     guildId: string;
     botToken: string;
     dbURI?: string;
+    botOwner: string;
 }

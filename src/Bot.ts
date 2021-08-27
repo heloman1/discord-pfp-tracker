@@ -15,6 +15,7 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         ],
         partials: ["CHANNEL"],
         userChangeCount: keyv,
+        botOwner: config.botOwner,
     });
     client.on("ready", async (client) => {
         if (!(client instanceof ExtendedClient)) return;

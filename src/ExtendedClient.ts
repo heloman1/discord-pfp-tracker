@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Collection } from "discord.js";
+import { Client, ClientOptions, Collection, User } from "discord.js";
 import Keyv from "keyv";
 import { Command } from "./Command";
 import { commands } from "./commands";
@@ -7,17 +7,23 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 interface ExtendedClientOptions extends ClientOptions {
     userChangeCount: Keyv<number>;
+    botOwner: string;
 }
 
 export class ExtendedClient extends Client {
     commands: Collection<string, Command>;
     userChangeCount: Keyv<number>;
+    botOwner?: User;
     constructor(options: ExtendedClientOptions) {
         super(options);
         this.commands = commands;
         this.userChangeCount = options.userChangeCount;
+        this.fetchOwner(options.botOwner);
     }
 
+    async fetchOwner(botOwner: string) {
+        this.botOwner = await this.users.fetch(botOwner);
+    }
     private SlashCommandRest: REST | undefined;
     async refreshSlashCommands(
         commands: Collection<string, Command>,
