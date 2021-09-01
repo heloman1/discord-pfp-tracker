@@ -69,13 +69,18 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         if (oldUser.partial) {
             oldUser = await oldUser.fetch();
         }
-        console.log(`${newUser.tag} changed in some way!`);
 
         if (oldUser.avatar != newUser.avatar) {
-            console.log("The avatar changed!");
+            console.log(`${newUser.tag} has changed their avatar!`);
+            if (oldUser.id !== newUser.id) {
+                console.log(
+                    `${newUser.tag} also somehow changed their id? Ignoring a probable error`
+                );
+                return;
+            }
             const oldCount = await client.userChangeCount.get(newUser.id);
 
-            if (!oldCount) {
+            if (oldCount === undefined) {
                 console.log(
                     `${newUser.username}'s count undefined for some reason`
                 );
@@ -84,10 +89,11 @@ export function runBot(keyv: Keyv<number>, config: Config) {
                 );
                 client.userChangeCount.set(newUser.id, 1);
             } else {
+                console.log(`Incrementing ${newUser.tag} (${newUser.id}) by 1`);
                 client.userChangeCount.set(newUser.id, oldCount + 1);
             }
         } else {
-            console.log("The avatar is the same.");
+            console.log(`${newUser.tag} changed something, idk what it was.`);
         }
     });
 
