@@ -31,6 +31,8 @@ export default new Command(
                 ),
             });
         }
+
+        // Sort by amount, then by name
         memberCounts.sort((a, b) => {
             if (a.changeCount === b.changeCount) {
                 return a.member.displayName.localeCompare(b.member.displayName);

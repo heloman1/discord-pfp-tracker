@@ -74,7 +74,7 @@ export function runBot(keyv: Keyv<number>, config: Config) {
             console.log(`${newUser.tag} has changed their avatar!`);
             if (oldUser.id !== newUser.id) {
                 console.log(
-                    `${newUser.tag} also somehow changed their id? Ignoring a probable error`
+                    `${newUser.tag} also somehow changed their id? Ignoring avatar change due to a probable error`
                 );
                 return;
             }
