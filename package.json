@@ -19,7 +19,7 @@
     "@discordjs/builders": "^0.5.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "@keyv/sqlite": "^2.0.2",
-    "discord-api-types": "^0.22.0",
+    "discord-api-types": "^0.23.1",
     "discord.js": "^13.1.0",
     "keyv": "^4.0.3"
   }
