@@ -36,7 +36,7 @@ export default new Command(
             );
             return;
         }
-        
+
         const user = (
             await interaction.guild.members.search({
                 query: searchUser,
@@ -47,12 +47,15 @@ export default new Command(
         if (!user) {
             await interaction.reply(`Hmm, I didn't find anybody`);
         } else {
+            const changeCount = await interaction.client.userChangeCount.get(
+                user.id
+            );
             await interaction.reply(
                 `${
                     user.displayName
-                } has changed their profile picture ${await interaction.client.userChangeCount.get(
-                    user.id
-                )} times!`
+                } has changed their profile picture ${changeCount} time${
+                    changeCount === 1 ? "" : "s"
+                }!`
             );
         }
     }
