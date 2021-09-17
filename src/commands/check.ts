@@ -29,9 +29,17 @@ export default new Command(
             return;
         }
 
+        const searchUser = interaction.options.getUser("user")?.username;
+        if (!searchUser) {
+            await interaction.reply(
+                `Uh, how did you run this command without a user?`
+            );
+            return;
+        }
+        
         const user = (
             await interaction.guild.members.search({
-                query: "TBI",
+                query: searchUser,
                 limit: 1,
             })
         ).first();
