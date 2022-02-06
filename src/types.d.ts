@@ -5,3 +5,7 @@ export interface Config {
     dbURI?: string;
     botOwner: string;
 }
+
+export type LowDBSchema = {
+    [key: string]: { total: number };
+};

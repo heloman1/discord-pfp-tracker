@@ -1,9 +1,13 @@
 import fs from "fs";
-import Keyv from "keyv";
-import { Config } from "./types";
+import { Config, LowDBSchema } from "./types";
 import { runBot } from "./Bot";
+import { JSONFileSync, LowSync } from "lowdb/lib";
+
+const configLoc = "data/config.json";
+const defaultDBLoc = "data/db.json";
+
 function loadConfig(path: string): Config {
-    const config = JSON.parse(fs.readFileSync(path).toString());
+    const config: Config = JSON.parse(fs.readFileSync(path).toString());
 
     if (!config.appId) {
         throw "Please set the appId";
@@ -12,32 +16,28 @@ function loadConfig(path: string): Config {
         throw "Please set the guildId";
     }
     if (!config.botToken) {
-        throw `${configPath} must have a botToken`;
+        throw `${configLoc} must have a botToken`;
     }
     if (!config.botOwner) {
         throw "Please set the botOwner";
     }
+    if (!config.dbURI) {
+        console.log(`NOTE: dbURI not set, using default location (${path})`);
+    }
+
     return config;
 }
 
-function loadUserChangeCount(path?: string) {
-    if (!path) {
-        path = "sqlite://data/db.sqlite";
+function loadDb(path: string) {
+    const db = new LowSync<LowDBSchema>(new JSONFileSync(path));
+    db.read();
+    if (!db.data) {
+        db.data = {};
     }
-    const userChangeCount = new Keyv<number>({
-        adapter: "sqlite",
-        uri: path,
-        namespace: "userChangeCount",
-    });
-    userChangeCount.on("error", (err) => {
-        console.error("Error when connecting to sqlite");
-        throw err;
-    });
-    return userChangeCount;
+    return db;
 }
 
-const configPath = "data/config.json";
-const config = loadConfig(configPath);
-const db = loadUserChangeCount(config.dbURI);
+const config = loadConfig(configLoc);
+const db = loadDb(config.dbURI || configLoc);
 
 runBot(db, config);

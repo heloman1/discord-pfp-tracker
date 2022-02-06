@@ -1,10 +1,10 @@
 import { Intents } from "discord.js";
-import { Config } from "./types";
+import { Config, LowDBSchema } from "./types";
 import { ExtendedClient } from "./ExtendedClient";
 import { commands } from "./commands";
-import Keyv from "keyv";
+import { LowSync } from "lowdb/lib";
 
-export function runBot(keyv: Keyv<number>, config: Config) {
+export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
     const client = new ExtendedClient({
         intents: [
             Intents.FLAGS.GUILDS,
@@ -14,7 +14,7 @@ export function runBot(keyv: Keyv<number>, config: Config) {
             Intents.FLAGS.GUILD_MEMBERS,
         ],
         partials: ["CHANNEL"],
-        userChangeCount: keyv,
+        dbCache: lowdb,
         botOwner: config.botOwner,
     });
     client.on("ready", async (client) => {
@@ -35,14 +35,18 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         // Trying to get rid of all undefined's
         console.log("Updating user list...");
         const users = client.users.cache;
+        let modified = false;
         for (const [snowflake, user] of users) {
-            if ((await client.userChangeCount.get(snowflake)) === undefined) {
+            if (client.dbCache.data![snowflake] === undefined) {
                 console.log(
                     `Adding ${user.tag} (${snowflake}) with a count of 0`
                 );
-                client.userChangeCount.set(snowflake, 0);
+                client.dbCache.data![snowflake].total = 0;
+                modified = true;
             }
         }
+        if (modified) client.dbCache.write();
+
         console.log("Done!");
 
         await client.refreshSlashCommands(
@@ -56,11 +60,13 @@ export function runBot(keyv: Keyv<number>, config: Config) {
         if (!(member.client instanceof ExtendedClient)) {
             return;
         }
-        if ((await client.userChangeCount.get(member.id)) === undefined) {
+
+        if (client.dbCache.data![member.id] === undefined) {
             console.log(
                 `Member joined: Adding ${member.user.tag} (${member.id}) with a count of 0`
             );
-            client.userChangeCount.set(member.id, 0);
+            client.dbCache.data![member.id].total = 0;
+            client.dbCache.write();
         }
     });
 
@@ -78,22 +84,24 @@ export function runBot(keyv: Keyv<number>, config: Config) {
                 );
                 return;
             }
-            const oldCount = await client.userChangeCount.get(newUser.id);
 
-            if (oldCount === undefined) {
+            if (client.dbCache.data![newUser.id].total === undefined) {
                 console.log(
                     `${newUser.username}'s count undefined for some reason`
                 );
                 console.log(
-                    `Adding ${newUser.tag} (${newUser.id}) with a count of 1`
+                    `Adding ${newUser.tag} (${newUser.id}) with a count of 0`
                 );
-                client.userChangeCount.set(newUser.id, 1);
-            } else {
-                console.log(`Incrementing ${newUser.tag} (${newUser.id}) by 1`);
-                client.userChangeCount.set(newUser.id, oldCount + 1);
+                client.dbCache.data![newUser.id].total = 0;
             }
+
+            console.log(`Incrementing ${newUser.tag} (${newUser.id}) by 1`);
+            client.dbCache.data![newUser.id].total += 1;
+            client.dbCache.write();
         } else {
-            console.log(`${newUser.tag} changed something, idk what it was.`);
+            console.log(
+                `${newUser.tag} changed something, idk what it was, but it was no a pfp picture.`
+            );
         }
     });
 
@@ -124,11 +132,12 @@ export function runBot(keyv: Keyv<number>, config: Config) {
     client.on("guildCreate", async (guild) => {
         const members = await guild.members.fetch();
         for (const [_, member] of members) {
-            if ((await client.userChangeCount.get(member.id)) === undefined) {
+            if (client.dbCache.data![member.id] === undefined) {
                 console.log(
                     `Member joined: Adding ${member.user.tag} (${member.id}) with a count of 0`
                 );
-                client.userChangeCount.set(member.id, 0);
+                client.dbCache.data![member.id].total = 0;
+                client.dbCache.write();
             }
         }
     });
