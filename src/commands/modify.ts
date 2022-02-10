@@ -42,19 +42,19 @@ export default new Command(
 
         switch (actionArg) {
             case "add":
-                client.dbCache.data![userArg.id].total += valueArg;
+                client.dbCache.data!.userData[userArg.id].total += valueArg;
                 await intxn.reply(
                     `Increased ${userArg.username}'s count by ${valueArg}`
                 );
                 break;
             case "subtract":
-                client.dbCache.data![userArg.id].total -= valueArg;
+                client.dbCache.data!.userData[userArg.id].total -= valueArg;
                 await intxn.reply(
                     `Decreased ${userArg.username}'s count by ${valueArg}`
                 );
                 break;
             case "clear":
-                client.dbCache.data![userArg.id].total = 0;
+                client.dbCache.data!.userData[userArg.id].total = 0;
                 await intxn.reply(`Cleared ${userArg.username}'s count`);
                 break;
             case "set":

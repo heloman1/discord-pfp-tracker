@@ -7,5 +7,6 @@ export interface Config {
 }
 
 export type LowDBSchema = {
-    [key: string]: { total: number };
+    version: 1;
+    userData: { [key: string]: { total: number } };
 };

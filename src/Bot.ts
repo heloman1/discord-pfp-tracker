@@ -35,11 +35,11 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
         const users = client.users.cache;
         let modified = false;
         for (const [snowflake, user] of users) {
-            if (client.dbCache.data![snowflake] === undefined) {
+            if (client.dbCache.data!.userData![snowflake] === undefined) {
                 console.log(
                     `Adding ${user.tag} (${snowflake}) with a count of 0`
                 );
-                client.dbCache.data![snowflake] = { total: 0 };
+                client.dbCache.data!.userData[snowflake] = { total: 0 };
                 modified = true;
             }
         }
@@ -55,11 +55,11 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
     });
     // Add any users that join a guild that didn't exist before
     client.on("guildMemberAdd", async (member) => {
-        if (client.dbCache.data![member.id] === undefined) {
+        if (client.dbCache.data!.userData[member.id] === undefined) {
             console.log(
                 `Member joined: Adding ${member.user.tag} (${member.id}) with a count of 0`
             );
-            client.dbCache.data![member.id].total = 0;
+            client.dbCache.data!.userData[member.id].total = 0;
             client.dbCache.write();
         }
     });
@@ -79,18 +79,18 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
                 return;
             }
 
-            if (client.dbCache.data![newUser.id].total === undefined) {
+            if (client.dbCache.data!.userData[newUser.id].total === undefined) {
                 console.log(
                     `${newUser.username}'s count undefined for some reason`
                 );
                 console.log(
                     `Adding ${newUser.tag} (${newUser.id}) with a count of 0`
                 );
-                client.dbCache.data![newUser.id].total = 0;
+                client.dbCache.data!.userData[newUser.id].total = 0;
             }
 
             console.log(`Incrementing ${newUser.tag} (${newUser.id}) by 1`);
-            client.dbCache.data![newUser.id].total += 1;
+            client.dbCache.data!.userData[newUser.id].total += 1;
             client.dbCache.write();
         } else {
             console.log(
@@ -126,11 +126,11 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
     client.on("guildCreate", async (guild) => {
         const members = await guild.members.fetch();
         for (const [_, member] of members) {
-            if (client.dbCache.data![member.id] === undefined) {
+            if (client.dbCache.data!.userData[member.id] === undefined) {
                 console.log(
                     `Member joined: Adding ${member.user.tag} (${member.id}) with a count of 0`
                 );
-                client.dbCache.data![member.id].total = 0;
+                client.dbCache.data!.userData[member.id].total = 0;
                 client.dbCache.write();
             }
         }

@@ -19,7 +19,8 @@ export default new Command(
         }[] = interaction.guild.members.cache.map((member, snowflake) => {
             return {
                 member,
-                changeCount: interaction.client.dbCache.data![snowflake].total,
+                changeCount:
+                    interaction.client.dbCache.data!.userData[snowflake].total,
             };
         });
 

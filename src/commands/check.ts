@@ -38,7 +38,8 @@ export default new Command(
         if (!user) {
             await interaction.reply(`Hmm, I didn't find anybody`);
         } else {
-            const changeCount = interaction.client.dbCache.data![user.id].total;
+            const changeCount =
+                interaction.client.dbCache.data!.userData[user.id].total;
             await interaction.reply(
                 `${
                     user.displayName

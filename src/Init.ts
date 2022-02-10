@@ -31,7 +31,7 @@ function loadDb(path: string) {
     const db = new LowSync<LowDBSchema>(new JSONFileSync(path));
     db.read();
     if (!db.data) {
-        db.data = {};
+        db.data = { version: 1, userData: {} };
     }
     return db;
 }
