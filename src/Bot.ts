@@ -1,6 +1,6 @@
 import { Intents } from "discord.js";
-import { Config, LowDBSchema } from "./types";
-import { ExtendedClient } from "./ExtendedClient";
+import { Config, LowDBSchema } from "./lib/types";
+import ExtendedClient from "./lib/ExtendedClient.js";
 import { commands } from "./commands";
 import { LowSync } from "lowdb/lib";
 
@@ -39,7 +39,7 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
                 console.log(
                     `Adding ${user.tag} (${snowflake}) with a count of 0`
                 );
-                client.dbCache.data![snowflake].total = 0;
+                client.dbCache.data![snowflake] = { total: 0 };
                 modified = true;
             }
         }

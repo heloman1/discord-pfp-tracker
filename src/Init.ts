@@ -1,8 +1,7 @@
 import fs from "fs";
-import { Config, LowDBSchema } from "./types";
-import { runBot } from "./Bot";
-import { JSONFileSync, LowSync } from "lowdb/lib";
-
+import { Config, LowDBSchema } from "./lib/types";
+import { runBot } from "./Bot.js";
+import { JSONFileSync, LowSync } from "lowdb";
 const configLoc = "data/config.json";
 const defaultDBLoc = "data/db.json";
 
@@ -38,6 +37,6 @@ function loadDb(path: string) {
 }
 
 const config = loadConfig(configLoc);
-const db = loadDb(config.dbURI || configLoc);
+const db = loadDb(config.dbURI || defaultDBLoc);
 
 runBot(db, config);

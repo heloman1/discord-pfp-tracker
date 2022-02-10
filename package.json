@@ -1,11 +1,12 @@
 {
+    "type": "module",
     "name": "discord-pfp-tracker",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "index.mjs",
     "scripts": {
         "build": "tsc",
-        "start": "node out/Init.js"
+        "start": "node --experimental-specifier-resolution=node --enable-source-maps out/Init.js"
     },
     "keywords": [],
     "author": "",

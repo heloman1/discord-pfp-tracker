@@ -1,15 +1,7 @@
-import {
-    ApplicationCommand,
-    Client,
-    ClientOptions,
-    Collection,
-    Snowflake,
-    User,
-} from "discord.js";
+import { Client, ClientOptions, Collection, User } from "discord.js";
 import { Command } from "./Command";
-import { commands } from "./commands";
+import { commands } from "../commands";
 
-import { ApplicationCommandOptionType, Routes } from "discord-api-types/v9";
 import { LowSync } from "lowdb/lib";
 import { LowDBSchema } from "./types";
 interface ExtendedClientOptions extends ClientOptions {
@@ -25,7 +17,7 @@ declare module "discord.js" {
             commands: Collection<string, Command>,
             appId: string,
             token: string
-        ): void;
+        ): Promise<void>;
         dbCache: LowSync<LowDBSchema>;
     }
 }
@@ -58,8 +50,9 @@ export class ExtendedClient<
             console.log("Refreshing Slash Commands...");
             await this.guilds.fetch();
             this.guilds.cache.forEach((guild) =>
-                slashCommandData.forEach((commandData) =>
-                    guild.commands.create(commandData)
+                slashCommandData.forEach(
+                    async (commandData) =>
+                        await guild.commands.create(commandData)
                 )
             );
             console.log("Done!");

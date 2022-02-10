@@ -4,7 +4,7 @@ import modify from "./modify";
 import check from "./check";
 
 import { Collection } from "discord.js";
-import { Command } from "../Command";
+import { Command } from "../lib/Command";
 
 export const commands = new Collection<string, Command>([
     [ping.name, ping],

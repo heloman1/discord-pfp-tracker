@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import { Command } from "../Command";
+import { Command } from "../lib/Command";
 
 export default new Command(
     {
