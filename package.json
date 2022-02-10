@@ -6,7 +6,7 @@
     "main": "index.mjs",
     "scripts": {
         "build": "tsc",
-        "start": "node --experimental-specifier-resolution=node --enable-source-maps out/Init.js"
+        "start": "node --experimental-specifier-resolution=node out/Init.js"
     },
     "keywords": [],
     "author": "",
