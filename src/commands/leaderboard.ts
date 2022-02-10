@@ -8,12 +8,6 @@ export default new Command(
         .setName("leaderboard")
         .setDescription("Prints the top 10 profile picture changers"),
     async (interaction) => {
-        if (!(interaction.client instanceof ExtendedClient)) {
-            interaction.reply(
-                "Something went horribly wrong, tell the developer that the Client isn't an ExtendedClient"
-            );
-            return;
-        }
         if (!interaction.guild) {
             interaction.reply("This command doesn't work outside of a guild");
             return;
@@ -26,9 +20,7 @@ export default new Command(
         for (const [snowflake, member] of interaction.guild.members.cache) {
             memberCounts.push({
                 member: member,
-                changeCount: await interaction.client.userChangeCount.get(
-                    snowflake
-                ),
+                changeCount: interaction.client.dbCache.data![snowflake].total,
             });
         }
 

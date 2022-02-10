@@ -18,8 +18,6 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
         botOwner: config.botOwner,
     });
     client.on("ready", async (client) => {
-        if (!(client instanceof ExtendedClient)) return;
-
         console.log(`Logged in as ${client.user.tag}!`);
         console.log(
             `Here's my invite: ${client.generateInvite({
@@ -57,10 +55,6 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
     });
     // Add any users that join a guild that didn't exist before
     client.on("guildMemberAdd", async (member) => {
-        if (!(member.client instanceof ExtendedClient)) {
-            return;
-        }
-
         if (client.dbCache.data![member.id] === undefined) {
             console.log(
                 `Member joined: Adding ${member.user.tag} (${member.id}) with a count of 0`

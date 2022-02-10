@@ -18,12 +18,6 @@ export default new Command(
             "Prints the number of times a user has changed their profile picture"
         ),
     async (interaction) => {
-        if (!(interaction.client instanceof ExtendedClient)) {
-            interaction.reply(
-                "Something went horribly wrong, tell the developer that the Client isn't an ExtendedClient"
-            );
-            return;
-        }
         if (!interaction.guild) {
             interaction.reply("This command doesn't work outside of a guild");
             return;
@@ -47,9 +41,7 @@ export default new Command(
         if (!user) {
             await interaction.reply(`Hmm, I didn't find anybody`);
         } else {
-            const changeCount = await interaction.client.userChangeCount.get(
-                user.id
-            );
+            const changeCount = interaction.client.dbCache.data![user.id].total;
             await interaction.reply(
                 `${
                     user.displayName

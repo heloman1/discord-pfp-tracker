@@ -1,4 +1,4 @@
-import { Client, ClientOptions, Collection, User } from "discord.js";
+import { Client, ClientOptions, Collection, Snowflake, User } from "discord.js";
 import { Command } from "./Command";
 import { commands } from "./commands";
 
@@ -11,17 +11,21 @@ interface ExtendedClientOptions extends ClientOptions {
     botOwner: string;
 }
 
-declare module "./ExtendedClient" {
+declare module "discord.js" {
     interface Client {
+        botOwner?: User;
         fetchOwner(botOwner: string): void;
         refreshSlashCommands(
             commands: Collection<string, Command>,
             appId: string,
             token: string
         ): void;
+        dbCache: LowSync<LowDBSchema>;
     }
 }
-export class ExtendedClient extends Client {
+export class ExtendedClient<
+    Ready extends boolean = boolean
+> extends Client<Ready> {
     commands: Collection<string, Command>;
     dbCache: LowSync<LowDBSchema>;
     botOwner?: User;

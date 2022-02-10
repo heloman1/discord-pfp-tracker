@@ -34,28 +34,21 @@ export default new Command(
                 .setDescription("the amount")
         )
         .setDescription("Prints the top 10 profile picture changers"),
-    async (interaction) => {
-        if (!(interaction.client instanceof ExtendedClient)) {
-            interaction.reply(
-                "Something went horribly wrong, tell the developer that the Client isn't an ExtendedClient"
-            );
-            return;
-        }
-        const client = interaction.client;
-        if (!(interaction.member?.user.id == client.botOwner?.id)) {
-            interaction.reply(
+    async (intxn) => {
+        const client = intxn.client;
+        if (!(intxn.member?.user.id == client.botOwner?.id)) {
+            intxn.reply(
                 `You must be the creator of the bot to use this command`
             );
             return;
         }
 
-        const user = await interaction.options.getUser("user", true).fetch();
-        const action = interaction.options.getString("action", true);
-        let value = interaction.options.getInteger("value");
+        const user = await intxn.options.getUser("user", true).fetch();
+        const action = intxn.options.getString("action", true);
+        let value = intxn.options.getInteger("value");
 
-        let currentValue = await interaction.client.userChangeCount.get(
-            user.id
-        );
+        let currentValue = intxn.client.dbCache.data![user.id].total;
+
         if (!currentValue) {
             currentValue = 0;
         }
@@ -64,32 +57,27 @@ export default new Command(
         }
         switch (action) {
             case "add":
-                interaction.client.userChangeCount.set(
-                    user.id,
-                    currentValue + value
-                );
-                await interaction.reply(
+                client.dbCache.data![user.id].total += value;
+                await intxn.reply(
                     `Increased ${user.username}'s count by ${value}`
                 );
-                return;
+                break;
             case "subtract":
-                interaction.client.userChangeCount.set(
-                    user.id,
-                    currentValue - value
-                );
-                await interaction.reply(
+                client.dbCache.data![user.id].total -= value;
+                await intxn.reply(
                     `Decreased ${user.username}'s count by ${value}`
                 );
-                return;
+                break;
             case "clear":
-                interaction.client.userChangeCount.set(user.id, 0);
-                await interaction.reply(`Cleared ${user.username}'s count`);
-                return;
+                client.dbCache.data![user.id].total = 0;
+                await intxn.reply(`Cleared ${user.username}'s count`);
+                break;
             case "set":
                 break;
             default:
-                await interaction.reply(`Unknown action : ${action}`);
+                await intxn.reply(`Unknown action : ${action}`);
                 return;
         }
+        intxn.client.dbCache.write();
     }
 );
