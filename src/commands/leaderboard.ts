@@ -1,12 +1,12 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import { Command } from "../Command";
-import ExtendedClient from "../ExtendedClient";
 
 export default new Command(
-    new SlashCommandBuilder()
-        .setName("leaderboard")
-        .setDescription("Prints the top 10 profile picture changers"),
+    {
+        name: "leaderboard",
+        description: "Prints the top 10 profile picture changers",
+    },
+
     async (interaction) => {
         if (!interaction.guild) {
             interaction.reply("This command doesn't work outside of a guild");
@@ -16,13 +16,12 @@ export default new Command(
         const memberCounts: {
             member: GuildMember;
             changeCount?: number;
-        }[] = [];
-        for (const [snowflake, member] of interaction.guild.members.cache) {
-            memberCounts.push({
-                member: member,
+        }[] = interaction.guild.members.cache.map((member, snowflake) => {
+            return {
+                member,
                 changeCount: interaction.client.dbCache.data![snowflake].total,
-            });
-        }
+            };
+        });
 
         // Sort by amount, then by name
         memberCounts.sort((a, b) => {

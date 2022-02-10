@@ -1,39 +1,32 @@
-import {
-    SlashCommandBuilder,
-    SlashCommandIntegerOption,
-    SlashCommandStringOption,
-    SlashCommandUserOption,
-} from "@discordjs/builders";
 import { Command } from "../Command";
-import ExtendedClient from "../ExtendedClient";
 
 export default new Command(
-    new SlashCommandBuilder()
-        .setName("modify")
-        .addUserOption(
-            new SlashCommandUserOption()
-                .setName("user")
-                .setRequired(true)
-                .setDescription("User's actual name (and tag!)")
-        )
-        .addStringOption(
-            new SlashCommandStringOption()
-                .setName("action")
-                .addChoices([
-                    ["add", "add"],
-                    ["subtract", "subtract"],
-                    ["clear", "clear"],
-                    ["set", "set"],
-                ])
-                .setDescription("The action to do on this user")
-                .setRequired(true)
-        )
-        .addIntegerOption(
-            new SlashCommandIntegerOption()
-                .setName("value")
-                .setDescription("the amount")
-        )
-        .setDescription("Prints the top 10 profile picture changers"),
+    {
+        name: "modify",
+        description: "Prints the top 10 profile picture changers",
+        options: [
+            {
+                name: "user",
+                description: "User's name (and tag!)",
+                type: "USER",
+                required: true,
+            },
+            {
+                name: "action",
+                description: "The action to do on this user",
+                type: "STRING",
+                choices: [
+                    { name: "add", value: "add" },
+                    { name: "subtract", value: "subtract" },
+                    { name: "clear", value: "clear" },
+                    { name: "set", value: "set" },
+                ],
+                required: true,
+            },
+            { name: "value", description: "the amount", type: "INTEGER" },
+        ],
+    },
+
     async (intxn) => {
         const client = intxn.client;
         if (!(intxn.member?.user.id == client.botOwner?.id)) {
@@ -43,39 +36,31 @@ export default new Command(
             return;
         }
 
-        const user = await intxn.options.getUser("user", true).fetch();
-        const action = intxn.options.getString("action", true);
-        let value = intxn.options.getInteger("value");
+        const userArg = await intxn.options.getUser("user", true).fetch();
+        const actionArg = intxn.options.getString("action", true);
+        const valueArg = intxn.options.getInteger("value") || 0;
 
-        let currentValue = intxn.client.dbCache.data![user.id].total;
-
-        if (!currentValue) {
-            currentValue = 0;
-        }
-        if (!value) {
-            value = 0;
-        }
-        switch (action) {
+        switch (actionArg) {
             case "add":
-                client.dbCache.data![user.id].total += value;
+                client.dbCache.data![userArg.id].total += valueArg;
                 await intxn.reply(
-                    `Increased ${user.username}'s count by ${value}`
+                    `Increased ${userArg.username}'s count by ${valueArg}`
                 );
                 break;
             case "subtract":
-                client.dbCache.data![user.id].total -= value;
+                client.dbCache.data![userArg.id].total -= valueArg;
                 await intxn.reply(
-                    `Decreased ${user.username}'s count by ${value}`
+                    `Decreased ${userArg.username}'s count by ${valueArg}`
                 );
                 break;
             case "clear":
-                client.dbCache.data![user.id].total = 0;
-                await intxn.reply(`Cleared ${user.username}'s count`);
+                client.dbCache.data![userArg.id].total = 0;
+                await intxn.reply(`Cleared ${userArg.username}'s count`);
                 break;
             case "set":
                 break;
             default:
-                await intxn.reply(`Unknown action : ${action}`);
+                await intxn.reply(`Unknown action : ${actionArg}`);
                 return;
         }
         intxn.client.dbCache.write();

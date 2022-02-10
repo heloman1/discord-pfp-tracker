@@ -1,30 +1,27 @@
-import {
-    SlashCommandBuilder,
-    SlashCommandUserOption,
-} from "@discordjs/builders";
 import { Command } from "../Command";
-import ExtendedClient from "../ExtendedClient";
 
 export default new Command(
-    new SlashCommandBuilder()
-        .setName("check")
-        .addUserOption(
-            new SlashCommandUserOption()
-                .setName("user")
-                .setRequired(true)
-                .setDescription("A user to check!")
-        )
-        .setDescription(
-            "Prints the number of times a user has changed their profile picture"
-        ),
+    {
+        name: "check",
+        description:
+            "Prints the number of times a user has changed their profile picture",
+        options: [
+            {
+                name: "user",
+                required: true,
+                description: "A user to check",
+                type: "USER",
+            },
+        ],
+    },
     async (interaction) => {
         if (!interaction.guild) {
             interaction.reply("This command doesn't work outside of a guild");
             return;
         }
 
-        const searchUser = interaction.options.getUser("user")?.username;
-        if (!searchUser) {
+        const userArg = interaction.options.getUser("user")?.username;
+        if (!userArg) {
             await interaction.reply(
                 `Uh, how did you run this command without a user?`
             );
@@ -33,7 +30,7 @@ export default new Command(
 
         const user = (
             await interaction.guild.members.search({
-                query: searchUser,
+                query: userArg,
                 limit: 1,
             })
         ).first();

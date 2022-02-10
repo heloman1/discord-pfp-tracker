@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ApplicationCommandData, CommandInteraction } from "discord.js";
 
 export type Action = (interaction: CommandInteraction) => Promise<void>;
 
@@ -8,13 +8,13 @@ export type Action = (interaction: CommandInteraction) => Promise<void>;
  */
 export class Command {
     public get name(): string {
-        return this.commandBuilder.name;
+        return this.slashCommandData.name;
     }
 
-    commandBuilder: SlashCommandBuilder;
+    slashCommandData: ApplicationCommandData;
     action: Action;
-    constructor(commandBuilder: SlashCommandBuilder, action: Action) {
-        this.commandBuilder = commandBuilder;
+    constructor(slashCommandData: ApplicationCommandData, action: Action) {
+        this.slashCommandData = slashCommandData;
         this.action = action;
     }
 }
