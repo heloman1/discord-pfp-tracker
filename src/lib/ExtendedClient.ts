@@ -11,44 +11,40 @@ interface ExtendedClientOptions extends ClientOptions {
 
 declare module "discord.js" {
     interface Client {
-        botOwner?: User;
+        commandActions: Collection<string, Command>;
+        dbCache: LowSync<LowDBSchema>;
+        botOwner: User;
         fetchOwner(botOwner: string): void;
         refreshSlashCommands(
             commands: Collection<string, Command>
         ): Promise<void>;
-        dbCache: LowSync<LowDBSchema>;
     }
 }
 export class ExtendedClient<
     Ready extends boolean = boolean
 > extends Client<Ready> {
-    commands: Collection<string, Command>;
-    dbCache: LowSync<LowDBSchema>;
-    botOwner?: User;
     constructor(options: ExtendedClientOptions) {
         super(options);
-        this.commands = commands;
+        this.commandActions = commands;
         this.dbCache = options.dbCache;
-        this.fetchOwner(options.botOwner);
-    }
-
-    async fetchOwner(botOwner: string) {
-        this.botOwner = await this.users.fetch(botOwner);
+        this.botOwner = this.botOwner;
     }
 
     async refreshSlashCommands(commands: Collection<string, Command>) {
         const slashCommandData = commands.map(
             (command) => command.slashCommandData
         );
+        // This should be changed to use the slower, global version
+        // If this ever gets added to more than a single digits number
+        // of servers
         try {
             console.log("Refreshing Slash Commands...");
             await this.guilds.fetch();
-            this.guilds.cache.forEach((guild) =>
-                slashCommandData.forEach(
-                    async (commandData) =>
-                        await guild.commands.create(commandData)
-                )
-            );
+            for (const [_snowflake, guild] of this.guilds.cache) {
+                for (const command of slashCommandData) {
+                    await guild.commands.create(command);
+                }
+            }
             console.log("Done!");
         } catch (error) {
             console.error(error);

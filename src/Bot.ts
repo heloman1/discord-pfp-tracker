@@ -98,10 +98,13 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
         }
     });
 
+    // Command Handling
     client.on("interactionCreate", async (interaction) => {
         if (!interaction.isCommand()) return;
 
-        const command = commands.get(interaction.commandName);
+        const command = interaction.client.commandActions.get(
+            interaction.commandName
+        );
 
         if (!command) {
             await interaction.reply({
