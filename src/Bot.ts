@@ -1,4 +1,4 @@
-import { Intents } from "discord.js";
+import { DMChannel, Intents } from "discord.js";
 import { Config, LowDBSchema } from "./lib/types";
 import ExtendedClient from "./lib/ExtendedClient.js";
 import { commands } from "./commands";
@@ -95,6 +95,32 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
             console.log(
                 `${newUser.tag} changed something, idk what it was, but it was no a pfp picture.`
             );
+        }
+    });
+
+    // Owner Commands
+    client.on("messageCreate", async (msg) => {
+        const myself = msg.client.user;
+        if (!myself) {
+            throw "I am somehow not logged in, but recieving a message. (???)";
+        }
+        // Filter out messages created by myself
+        if (msg.author.id === myself.id) return;
+
+        // DM's only
+        if (!(msg.channel instanceof DMChannel)) return;
+
+        const responses = [
+            "I hear you, I'm just ignoring you.",
+            "Shush please.",
+            "Why are you talking to me, be quiet.",
+        ];
+
+        // 20% chance to responds
+        if (Math.random() <= 0.2) {
+            // Choose a random response
+            const choice = Math.floor(Math.random() * responses.length);
+            msg.channel.send(responses[choice]);
         }
     });
 
