@@ -14,9 +14,7 @@ declare module "discord.js" {
         botOwner?: User;
         fetchOwner(botOwner: string): void;
         refreshSlashCommands(
-            commands: Collection<string, Command>,
-            appId: string,
-            token: string
+            commands: Collection<string, Command>
         ): Promise<void>;
         dbCache: LowSync<LowDBSchema>;
     }
@@ -38,11 +36,7 @@ export class ExtendedClient<
         this.botOwner = await this.users.fetch(botOwner);
     }
 
-    async refreshSlashCommands(
-        commands: Collection<string, Command>,
-        appId: string,
-        token: string
-    ) {
+    async refreshSlashCommands(commands: Collection<string, Command>) {
         const slashCommandData = commands.map(
             (command) => command.slashCommandData
         );

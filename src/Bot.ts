@@ -30,11 +30,11 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
             })}`
         );
 
-        // Trying to get rid of all undefined's
-        console.log("Updating user list...");
-        const users = client.users.cache;
+        // People may have joined the server while the bot was (potentially) down
+        // Do a sync just in case
+        console.log("Syncing user list...");
         let modified = false;
-        for (const [snowflake, user] of users) {
+        for (const [snowflake, user] of client.users.cache) {
             if (client.dbCache.data!.userData![snowflake] === undefined) {
                 console.log(
                     `Adding ${user.tag} (${snowflake}) with a count of 0`
@@ -43,15 +43,14 @@ export function runBot(lowdb: LowSync<LowDBSchema>, config: Config) {
                 modified = true;
             }
         }
-        if (modified) client.dbCache.write();
-
+        if (modified) {
+            client.dbCache.write();
+        } else {
+            console.log("Already synced...");
+        }
         console.log("Done!");
 
-        await client.refreshSlashCommands(
-            commands,
-            config.appId,
-            config.botToken
-        );
+        await client.refreshSlashCommands(commands);
     });
     // Add any users that join a guild that didn't exist before
     client.on("guildMemberAdd", async (member) => {
