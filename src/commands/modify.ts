@@ -27,42 +27,45 @@ export default new Command(
         ],
     },
 
-    async (intxn) => {
-        const client = intxn.client;
-        if (!(intxn.member?.user.id == client.botOwner?.id)) {
-            intxn.reply(
-                `You must be the creator of the bot to use this command`
+    async ({ client, member, options, reply }) => {
+        if (!member) {
+            reply(
+                "I have no idea why I cannot read your member id. Because of that, I can't tell if you are the owner, and therefore am assuming you are not."
             );
             return;
         }
+        if (!(member.user.id === client.botOwner.id)) {
+            reply(`You must be the bot owner to use this command`);
+            return;
+        }
 
-        const userArg = await intxn.options.getUser("user", true).fetch();
-        const actionArg = intxn.options.getString("action", true);
-        const valueArg = intxn.options.getInteger("value") || 0;
+        const userArg = await options.getUser("user", true).fetch();
+        const actionArg = options.getString("action", true);
+        const valueArg = options.getInteger("value") || 0;
 
         switch (actionArg) {
             case "add":
                 client.dbCache.data!.userData[userArg.id].total += valueArg;
-                await intxn.reply(
+                await reply(
                     `Increased ${userArg.username}'s count by ${valueArg}`
                 );
                 break;
             case "subtract":
                 client.dbCache.data!.userData[userArg.id].total -= valueArg;
-                await intxn.reply(
+                await reply(
                     `Decreased ${userArg.username}'s count by ${valueArg}`
                 );
                 break;
             case "clear":
                 client.dbCache.data!.userData[userArg.id].total = 0;
-                await intxn.reply(`Cleared ${userArg.username}'s count`);
+                await reply(`Cleared ${userArg.username}'s count`);
                 break;
             case "set":
                 break;
             default:
-                await intxn.reply(`Unknown action : ${actionArg}`);
+                await reply(`Unknown action : ${actionArg}`);
                 return;
         }
-        intxn.client.dbCache.write();
+        client.dbCache.write();
     }
 );
