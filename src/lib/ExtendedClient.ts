@@ -31,9 +31,6 @@ export class ExtendedClient<
     }
 
     async refreshSlashCommands(commands: Collection<string, Command>) {
-        const slashCommandData = commands.map(
-            (command) => command.slashCommandData
-        );
         // This should be changed to use the slower, global version
         // If this ever gets added to more than a single digits number
         // of servers
@@ -41,8 +38,10 @@ export class ExtendedClient<
             console.log("Refreshing Slash Commands...");
             await this.guilds.fetch();
             for (const [_snowflake, guild] of this.guilds.cache) {
-                for (const command of slashCommandData) {
-                    await guild.commands.create(command);
+                for (const [_name, command] of commands) {
+                    if (!command.ownerOnly) {
+                        await guild.commands.create(command.slashCommandData);
+                    }
                 }
             }
             console.log("Done!");

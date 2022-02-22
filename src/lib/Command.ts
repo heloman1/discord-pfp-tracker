@@ -7,9 +7,15 @@ export type Action = (interaction: CommandInteraction) => Promise<void>;
  */
 export class Command {
     slashCommandData: ApplicationCommandData;
+    ownerOnly: boolean;
     action: Action;
-    constructor(slashCommandData: ApplicationCommandData, action: Action) {
+    constructor(
+        slashCommandData: ApplicationCommandData,
+        action: Action,
+        ownerOnly = false
+    ) {
         this.slashCommandData = slashCommandData;
         this.action = action;
+        this.ownerOnly = ownerOnly;
     }
 }

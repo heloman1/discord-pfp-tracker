@@ -3,7 +3,8 @@ import { Command } from "../lib/Command";
 export default new Command(
     {
         name: "modify",
-        description: "Prints the top 10 profile picture changers",
+        description:
+            "OWNER ONLY - Allows arbitrary modification of the numbers, just in case",
         options: [
             {
                 name: "user",
@@ -67,5 +68,6 @@ export default new Command(
                 return;
         }
         client.dbCache.write();
-    }
+    },
+    true
 );
