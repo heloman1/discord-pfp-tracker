@@ -3,10 +3,11 @@
     "name": "discord-pfp-tracker",
     "version": "1.0.0",
     "description": "",
-    "main": "index.mjs",
+    "main": "Init.js",
     "scripts": {
         "build": "tsc",
-        "start": "node --experimental-specifier-resolution=node out/Init.js"
+        "start": "node --experimental-specifier-resolution=node out/Init.js",
+        "dev": "ENVIRONMENT=DEV node --experimental-specifier-resolution=node out/Init.js"
     },
     "keywords": [],
     "author": "",
