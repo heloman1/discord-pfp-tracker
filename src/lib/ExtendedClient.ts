@@ -1,4 +1,10 @@
-import { Client, ClientOptions, Collection, User } from "discord.js";
+import {
+    ApplicationCommand,
+    ApplicationCommandDataResolvable,
+    Client,
+    ClientOptions,
+    Collection,
+} from "discord.js";
 import { Command } from "./Command";
 import { commands } from "../commands";
 
@@ -20,6 +26,74 @@ declare module "discord.js" {
         ): Promise<void>;
     }
 }
+
+/**
+ * This will update the client's registered application commands with the given
+ * list newCommands.
+ * @param client
+ * @param newCommands
+ * @param options Whether to only do global commands, guild commands, or both
+ */
+async function syncCommands(
+    client: ExtendedClient,
+    newCommands: Collection<string, Command>,
+    options: { guildCommands: boolean; globalCommands: boolean }
+) {
+    // TODO: Do I need to handle command edits differently?
+    // Because typescript was being weird when unioning types
+    // (GenericCommandManager)
+    type GCM = {
+        fetch: () => Promise<Collection<string, ApplicationCommand<{}>>>;
+        create: (
+            command: ApplicationCommandDataResolvable
+        ) => Promise<ApplicationCommand<{}>>;
+        cache: Collection<string, ApplicationCommand>;
+    };
+    async function deleteOldCommands<CM extends GCM>(commandManager: CM) {
+        await commandManager.fetch();
+        for (const [_, command] of commandManager.cache) {
+            if (!newCommands.has(command.name)) {
+                console.log(
+                    `Removing "${command.name}" from "${command.guild?.name}"`
+                );
+                command.delete();
+            }
+        }
+    }
+    async function addNewCommands<CM extends GCM>(commandManager: CM) {
+        for (const [_name, command] of newCommands) {
+            // Register new commands
+            if (!command.ownerOnly) {
+                await commandManager.create(command.slashCommandData);
+            }
+        }
+    }
+    if (options.guildCommands) {
+        await client.guilds.fetch();
+        for (const [_, guild] of client.guilds.cache) {
+            deleteOldCommands(guild.commands);
+            // Edit existing commandss
+            addNewCommands(guild.commands);
+        }
+    }
+    if (options.globalCommands) {
+        // console.log("Commands may take up to an hour to refresh");
+        const botCommands = client.application?.commands;
+        if (!botCommands)
+            throw "this.application is not defined? Did you somehow run this before logging in?";
+
+        deleteOldCommands(botCommands);
+        addNewCommands(botCommands);
+    }
+}
+
+function clearAllGuildCommands(client: ExtendedClient) {
+    syncCommands(client, new Collection(), {
+        globalCommands: false,
+        guildCommands: true,
+    });
+}
+
 export class ExtendedClient<
     Ready extends boolean = boolean
 > extends Client<Ready> {
@@ -37,52 +111,25 @@ export class ExtendedClient<
 
         console.log("Refreshing Slash Commands...");
         if (process.env.ENVIRONMENT === "DEV") {
+            console.log("NOTE: Updating using guild commands (DEV)");
             console.log(
-                "DEVMODE: fast refreshing using guild-specific commands"
+                "      (Faster but must be done for every server separately)"
             );
-            try {
-                await this.guilds.fetch();
-                for (const [_snowflake, guild] of this.guilds.cache) {
-                    // Remove old commands
-                    await guild.commands.fetch();
-                    for (const [_snowflake, command] of guild.commands.cache) {
-                        // If the guild has an unrecognized command, delete it
-                        if (!newCommands.has(command.name)) {
-                            console.log(
-                                `NOTE: Removing "${command.name}" from "${command.guild?.name}"`
-                            );
-                            command.delete();
-                        }
-                    }
-                    for (const [_name, command] of newCommands) {
-                        if (!command.ownerOnly) {
-                            await guild.commands.create(
-                                command.slashCommandData
-                            );
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-            }
+
+            syncCommands(this, newCommands, {
+                globalCommands: false,
+                guildCommands: true,
+            });
         } else {
-            console.log("NOTE: Commands may take up to an hour to refresh");
-            const botCommands = this.application?.commands;
-            if (!botCommands)
-                throw "this.application is not defined? Did you somehow run this before logging in?";
+            console.log("NOTE: Updating using global commands");
+            console.log("      New commands will take up to an hour to sync");
+            console.log("      Guild specific commands will be cleared");
 
-            for (const [_id, command] of botCommands.cache) {
-                if (!newCommands.has(command.name)) {
-                    console.log(`NOTE: Removing "${command.name}"`);
-                    command.delete();
-                }
-            }
-
-            for (const [_id, command] of newCommands) {
-                if (!command.ownerOnly) {
-                    await botCommands.create(command.slashCommandData);
-                }
-            }
+            syncCommands(this, newCommands, {
+                globalCommands: true,
+                guildCommands: false,
+            });
+            clearAllGuildCommands(this);
         }
         console.log("Done!");
     }
